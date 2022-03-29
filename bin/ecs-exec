@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
+# -*- mode: sh -*-
 
-nbb "$(dirname "$(readlink -f "$0")")/../modules/ecs-exec/ecs-exec.cljs" $@
+dir="$(dirname "$(readlink -f "$0")")/../modules/ecs-exec"
+
+# We prepend dir as the first element of the classpath is the module "local"
+# src directory
+exec nbb -cp "$dir/$(cd $dir ; clojure -Spath)" "$dir/ecs-exec.cljs" "$@"

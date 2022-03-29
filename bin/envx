@@ -3,4 +3,4 @@
 
 dir="$(dirname "$(readlink -f "$0")")/../modules/envx"
 
-exec bb "$dir/envx.clj" $@
+exec bb "$dir/envx.clj" "$@"

@@ -3,4 +3,4 @@
 
 dir="$(dirname "$(readlink -f "$0")")/../modules/loke"
 
-exec bb "$dir/loke.clj" $@
+exec bb "$dir/loke.clj" "$@"
