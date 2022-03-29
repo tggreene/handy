@@ -8,6 +8,8 @@ It uses `x://` style protocols to perform io operations on a provided value,
 where `x://` has been chosen not to conflict with existing protocols and be a
 little more explicit.
 
+**NOTE**: Make sure you trust the envx.edn file you're running!
+
 ## Supported "Protocols"
 
  - [Unix Pass](https://www.passwordstore.org/) via `unix-pass://`
