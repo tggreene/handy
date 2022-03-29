@@ -2,3 +2,6 @@
 **/.cpcache
 **/.shadow-cljs
 **/.clj-kondo/.cache
+**/.rebel_readline_history
+**/.nrepl-port
+!**/target/*/.gitkeep
