@@ -4,22 +4,22 @@ Some handy scripts (babashka mostly) for various purposes.
 
 ## Scripts
 
-### `ecs-exec`
+### [`ecs-exec`](modules/envx)
 
 Pick out a container for your cluster to shell or port forward to interactively.
 Simplifies what can be a notty invokation with vanilla aws cli.
 
-### `envx`
+### [`envx`](modules/envx)
 
 Create dynamic environments from simple config files, pull in configuration and
 secrets from other programs, network or files.
 
-### `loke`
+### [`loke`](modules/envx)
 
 "Local invoke", keep a stash of frequently run _personal_ development tasks
 using incantations that you'd prefer not to burden others with.
 
-### `watchx`
+### [`watchx`](modules/envx)
 
 Simple watch command that listens for file changes.
 
