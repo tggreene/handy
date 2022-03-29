@@ -1,2 +1,4 @@
 **/node_modules
+**/.cpcache
+**/.shadow-cljs
 **/.clj-kondo/.cache
