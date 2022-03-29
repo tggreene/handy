@@ -1,17 +1,23 @@
 (ns ecs-exec
-  (:require ["argparse" :refer [ArgumentParser]]
-            ["@aws-sdk/client-ecs"
+  (:require ["@aws-sdk/client-ecs"
              :refer [ECSClient ListClustersCommand ListTasksCommand
                      DescribeTasksCommand]]
             ["execa" :refer [execa]]
-            ["ink" :refer [render Text Box Newline]]
+            ["ink" :refer [render Text Box]]
             ["ink-select-input$default.default" :as SelectInput]
             ["ink-spinner$default.default" :as Spinner]
             ["ink-text-input" :refer [UncontrolledTextInput]]
             [applied-science.js-interop :as j]
             [reagent.core :as r]
             [promesa.core :as p]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.tools.cli :as cli]
+            [tggreene.oeuvre :as o]
+            [goog.string :refer [format]]))
+
+(def term
+  {:columns js/process.stdout.columns
+   :rows js/process.stdout.rows})
 
 (defonce state
   (r/atom {:stage :loading
@@ -106,7 +112,7 @@
           [select {:items (->> clusters
                                (find-first {:arn (:arn selected-cluster)})
                                :containers)
-                   :label-fn :name
+                   :label-fn #(str (:name %) " (" (:instance-id %) ")")
                    :on-select #(swap! state
                                       assoc
                                       :selected-container %
@@ -148,7 +154,9 @@
         (when selected-cluster
           [:> Text {:color :yellow} (str "Cluster: " (:name selected-cluster))])
         (when selected-container
-          [:> Text {:color :yellow} (str "Container: " (:name selected-container))])]])))
+          [:> Text {:color :yellow} (str "Container: "
+                                         (:name selected-container)
+                                         " (" (:instance-id selected-container) ")")])]])))
 
 
 (def ecs-client (ECSClient.))
@@ -202,9 +210,10 @@
             (j/lookup)
             :tasks
             (->> (mapcat (comp :containers j/lookup))
-                 (map (j/fn [^:js {:keys [name runtimeId taskArn]}]
+                 (map (j/fn [^:js {:keys [name runtimeId taskArn] :as x}]
                         {:name name
                          :runtime-id runtimeId
+                         :instance-id (str/replace runtimeId #".+-" "")
                          :task-id (task-arn->task-id taskArn)
                          :cluster-id (task-arn->cluster-id taskArn)})))))))
 
@@ -216,61 +225,131 @@
                    (.unmount ink))))
   (js/process.exit 1))
 
-(def parser
-  (ArgumentParser.
-   #js {:prog "ecs-exec"
-        :description
-        "Execute commands on ecs containers (run without args for an interactive prompt)"}))
-
-(.add_argument parser "-c" "--cluster"
-               #js {:help "Cluster name (matched against AWS results)"})
-
-(.add_argument parser "-C" "--container"
-               #js {:help "Container name (matched against AWS results)"})
-
-(.add_argument parser "-s" "--shell"
-               #js {:action "store_true"
-                    :help "Create a remote shell session"})
-
-(.add_argument parser "-p" "--ports"
-               #js {:help "Create a port forwarding session, provide ports. Format: target-port:local-port e.g. 3000:3000"})
 
 (defn start!
-  []
-  (let [has-args? (boolean (seq *command-line-args*))
-        {:keys [cluster container shell ports]}
-        (->> (vec *command-line-args*)
-             clj->js
-             (.parse_args parser)
-             (j/lookup))]
-    (p/let [_credentials (p/catch
-                             (-> ecs-client .-config .credentials)
-                             (fn [ex]
-                               (println (.-message ex))
-                               (cleanup-and-exit)))
-            clusters (get-clusters)
-            clusters
-            (p/all
-             (for [{:keys [arn] :as cluster} clusters]
-               (p/let [containers (get-containers arn)]
-                 (assoc cluster :containers containers))))]
-      (swap! state assoc :clusters clusters :stage :select-cluster)
-      (when has-args?
-        (let [selected-cluster (find-first #(re-find (re-pattern cluster) (:name %)) clusters)
-              selected-container (find-first #(re-find (re-pattern container) (:name %))
-                                             (:containers
+  [{:keys [cluster container ports]}]
+  (p/let [_credentials (p/catch
+                           (-> ecs-client .-config .credentials)
+                           (fn [ex]
+                             (println (.-message ex))
+                             (cleanup-and-exit)))
+          clusters (get-clusters)
+          clusters
+          (p/all
+           (for [{:keys [arn] :as cluster} clusters]
+             (p/let [containers (get-containers arn)]
+               (assoc cluster :containers containers))))
+          selected-cluster (when cluster
+                             (o/find-first clusters #(re-find (re-pattern cluster) (:name %))))
+          selected-container (when (and cluster container)
+                               (o/find-first (:containers
                                               (find-first {:arn (:arn selected-cluster)}
-                                                          clusters)))
-              port-config (zipmap [:target-port :local-port] (str/split ports #":"))]
-          (run-command!
-           (swap! state merge {:selected-cluster selected-cluster
-                               :selected-container selected-container
-                               :port-config port-config
-                               :selected-command (if shell
-                                                   :shell
-                                                   :port-forwarding)}))
-          )))
-    (when-not has-args?
+                                                          clusters))
+                                             #(re-find (re-pattern container) (:name %))))
+          port-config (when ports
+                        (zipmap [:target-port :local-port] (str/split ports #":")))
+          selected-command (when (and selected-cluster
+                                      selected-container)
+                             (if port-config
+                               :port-forwarding
+                               :shell))
+          stage (cond
+                  selected-command :run-command
+                  selected-container :select-command
+                  selected-cluster :select-container
+                  :else :select-cluster)]
+    (cond->
+        (swap! state
+               merge
+               {:clusters clusters
+                :stage stage
+                :selected-command (when (and selected-cluster
+                                             selected-container)
+                                    (if port-config
+                                      :port-forwarding
+                                      :shell))
+                :selected-cluster selected-cluster
+                :selected-container selected-container
+                :port-config port-config})
+      selected-command (run-command!))
+    (when-not selected-command
       (swap! state assoc :ink (render (r/as-element [app]))))))
 
-(start!)
+(defn spacer
+  [n]
+  (apply str (repeat n " ")))
+
+(defn subs-seq
+  [s n]
+  (loop [xs []
+         s s]
+    (let [next-xs (conj xs (subs s 0 n))]
+      (if-let [next-s (not-empty (subs s n))]
+        (recur next-xs next-s)
+        next-xs))))
+
+(defn wrap-line
+  [s limit left]
+  (let [soft-limit (- limit left)]
+    (loop [tokens (->> (str/split s #"\s")
+                       (mapcat #(subs-seq % soft-limit)))
+           current ""
+           result ""]
+      (if (seq tokens)
+        (let [next (str current " " (first tokens))]
+          (if (< (count next) soft-limit)
+            (recur (rest tokens) next result)
+            (recur tokens "" (str result "\n" (spacer left) current))))
+        (str/trim (str result "\n" (spacer left) current))))))
+
+(defn format-option
+  [width [option description]]
+  (prn 'dl (count description))
+  (prn 'd description)
+  (if description
+    (format (str "    %-" width "s    %s\n")
+            option
+            (wrap-line description (:columns term) (+ width 8)))
+    (format "    %s\n" option)))
+
+(defn format-options
+  [options]
+  (let [options (->> options
+                     (map (fn [[short long description]]
+                            [(->> [short long]
+                                  (remove nil?)
+                                  (str/join ", "))
+                             description])))
+        width (apply max (map (comp count first) options))]
+    (map #(format-option width %) options)))
+
+(def cli-config
+  {:name "ecs-exec"
+   :description "Execute commands on ecs containers"
+   :version "0.1.0"
+   :options [["-cl" "--cluster CLUSTER" "Cluster name (matches against AWS results)"]
+             ["-cn" "--container CONTAINER" "Container name (matches against AWS results)"]
+             ["-p" "--ports PORTS" "Starts port-forwarding session, ports configuration, TARGET_PORT:LOCAL_PORT (e.g. -p 4000:4000)"]
+             ["-h" "--help"]
+             [nil "--version"]]})
+
+(defn format-help
+  []
+  (let [{:keys [name version description options]} cli-config]
+    (->> (format-options options)
+         (into ["NAME:\n"
+                "  " name " - " description "\n\n"
+                "VERSION:\n"
+                "  " version "\n\n"
+                "OPTIONS:\n"])
+         (apply str))))
+
+(defn -main
+  [& args]
+  (let [{:keys [options]} (cli/parse-opts args (:options cli-config))]
+    (cond
+      (:help options) (println (format-help))
+      (:version options) (println (:version cli-config))
+      :else (start! options))))
+
+(apply -main *command-line-args*)

@@ -1,1 +1,4 @@
-{}
+{:deps {org.clojure/tools.cli {:git/url "https://github.com/clojure/tools.cli.git"
+                               :sha "9a4813947fbc64e5d48102fe8e98ac96ccf514c2"}
+        tggreene/oeuvre {:git/url "https://github.com/tggreene/oeuvre.git"
+                         :sha "4118fa9f3bfef81c0ed3b3696c6421b39abaebdb"}}}
