@@ -1,5 +1,5 @@
 {"version":2,"width":138,"height":27,"timestamp":1648481602,"idle_time_limit":0.5,"env":{"SHELL":"/bin/zsh","TERM":"screen-256color"},"title":"ecs-exec"}
-[0.279501,"o","\u001B[1;36msome/nice/path\u001B[0m\u001B[0m\r\n\u001B[1;32m❯\u001B[0m \u001B[K\u001B[?1h\u001B="]
+[0.279501,"o","\u001B[1;36mproject\u001B[0m\u001B[0m\r\n\u001B[1;32m❯\u001B[0m \u001B[K\u001B[?1h\u001B="]
 [0.279541,"o","\u001B[?2004h"]
 [1.118572,"o","e"]
 [1.28377,"o","c"]

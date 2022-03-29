@@ -1,5 +1,5 @@
 {"version": 2, "width": 127, "height": 36, "timestamp": 1648560664, "idle_time_limit": 0.5, "env": {"SHELL": "/bin/zsh", "TERM": "screen-256color"}, "title": "handy/watchx"}
-[0.218579, "o", "\u001b[1;36mhandy/modules/watchx\u001b[0m on \u001b[1;35m \u001b[0m\u001b[1;35mcli-matic\u001b[0m \u001b[1;31m[\u001b[0m\u001b[1;31m!\u001b[0m\u001b[1;31m?\u001b[0m\u001b[1;31m]\u001b[0m via \u001b[2;31m☕ \u001b[0m\u001b[2;31mv11.0.10\u001b[0m\u001b[2;31m \u001b[0m\r\n\u001b[1;32m❯\u001b[0m \u001b[K\u001b[?1h\u001b="]
+[0.218579, "o", "\u001b[1;36mproject\u001b[0m\r\n\u001b[1;32m❯\u001b[0m \u001b[K\u001b[?1h\u001b="]
 [0.218616, "o", "\u001b[?2004h"]
 [3.301817, "o", "w"]
 [3.3807, "o", "\bwa"]
@@ -34,10 +34,4 @@
 [12.110654, "o", "/home/tim/workspaces/github.com/tggreene/handy/modules/watchx/test\r\n"]
 [13.817358, "o", "/home/tim/workspaces/github.com/tggreene/handy/modules/watchx/test\r\n"]
 [15.127152, "o", "/home/tim/workspaces/github.com/tggreene/handy/modules/watchx/test\r\n"]
-[16.519481, "o", "^C"]
-[16.525002, "o", "\u001b[1m\u001b[3m%\u001b[23m\u001b[1m\u001b[0m                                                                                                                              \r \r"]
-[16.529385, "o", "\u001bk..odules/watchx\u001b\\"]
-[16.629635, "o", "\r\u001b[0m\u001b[23m\u001b[24m\u001b[J\r\n\u001b[1;36mhandy/modules/watchx\u001b[0m on \u001b[1;35m \u001b[0m\u001b[1;35mcli-matic\u001b[0m \u001b[1;31m[\u001b[0m\u001b[1;31m!\u001b[0m\u001b[1;31m?\u001b[0m\u001b[1;31m]\u001b[0m via \u001b[2;31m☕ \u001b[0m\u001b[2;31mv11.0.10\u001b[0m\u001b[2;31m \u001b[0mtook \u001b[1;33m6s\u001b[0m \r\n\u001b[1;32m❯\u001b[0m \u001b[K"]
-[16.629684, "o", "\u001b[?1h\u001b="]
-[16.629825, "o", "\u001b[?2004h"]
 [17.673568, "o", "\u001b[?2004l\r\r\n"]
