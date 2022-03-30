@@ -2,7 +2,12 @@
 
 Some handy scripts (babashka mostly) for various purposes.
 
-## Installing
+## Install
+
+You need to have [`bb`](https://github.com/babashka/babashka#quickstart),
+[`nbb`](https://github.com/babashka/nbb#usage) and
+[`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+installed.
 
 Check out the repo locally `git clone git@github.com:tggreene/handy.git` and
 symlink the scripts you want into your `PATH` from the `bin` directory.
