@@ -304,8 +304,6 @@
 
 (defn format-option
   [width [option description]]
-  (prn 'dl (count description))
-  (prn 'd description)
   (if description
     (format (str "    %-" width "s    %s\n")
             option
