@@ -17,7 +17,7 @@ be able to symlink bin files into something like `~/.local/bin`.
 
 ## Scripts
 
-### [`ecs-exec`](modules/envx)
+### [`ecs-exec`](modules/ecs-exec)
 
 Pick out a container for your cluster to shell or port forward to interactively.
 Simplifies what can be a notty invokation with vanilla aws cli.
@@ -27,12 +27,12 @@ Simplifies what can be a notty invokation with vanilla aws cli.
 Create dynamic environments from simple config files, pull in configuration and
 secrets from other programs, network or files.
 
-### [`loke`](modules/envx)
+### [`loke`](modules/loke)
 
 "Local invoke", keep a stash of frequently run _personal_ development tasks
 using incantations that you'd prefer not to burden others with.
 
-### [`watchx`](modules/envx)
+### [`watchx`](modules/watchx)
 
 Simple watch command that listens for file changes.
 
