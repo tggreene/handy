@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-ecs": "3.56.0",
+    "@aws-sdk/client-ecs": "3.350.0",
     "aws-sdk": "2.1101.0",
     "execa": "6.1.0",
     "ink": "3.2.0",
